@@ -15,6 +15,8 @@ const BASE_KEYS = [
   { key: "Tab", shiftKey: true },
   { key: "n", ctrlKey: true },
   { key: "p", ctrlKey: true },
+  { key: "j", ctrlKey: true },
+  { key: "k", ctrlKey: true },
   { key: "Enter", metaKey: true },
   { key: "Enter", altKey: true },
   { key: "Enter", shiftKey: true },
@@ -69,8 +71,8 @@ export function barKeyDown(e: BarKeyEvent, k: BarKeyContext) {
     if (k.shownCompletion) return bar.dispatch({ kind: "completionDropped" });
     return k.reset();
   }
-  if (key === "ArrowDown" || (ctrlKey && key === "n")) return move(1);
-  if (key === "ArrowUp" || (ctrlKey && key === "p")) return move(-1);
+  if (key === "ArrowDown" || (ctrlKey && (key === "n" || key === "j"))) return move(1);
+  if (key === "ArrowUp" || (ctrlKey && (key === "p" || key === "k"))) return move(-1);
   if (key === "PageUp") return navigate(0);
   if (key === "PageDown") return navigate(Math.max(0, items.length - 1));
   if (key === "Delete" && shiftKey) return isRemovable(current) ? k.removeRow(current.url) : undefined;
