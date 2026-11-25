@@ -5,19 +5,25 @@ enum LinkActivationHold {
     let number: Int
     let owner: Int32
     let layer: Int
-    let bounds: CGRect
     var windowServer = false
   }
 
   static let overlayLayer = Int(CGWindowLevelForKey(.draggingWindow))
 
-  static func underPointer(_ pointer: CGPoint, frontToBack list: [Listed]) -> Listed? {
-    list.first { !$0.windowServer && (0..<overlayLayer).contains($0.layer) && $0.bounds.contains(pointer) }
+  static func underPointer(frontToBack list: [Listed], clickedBelow: (Int) -> Int) -> Listed? {
+    var below = 0
+    for _ in 0...list.count {
+      let number = clickedBelow(below)
+      guard number > 0, number != below, let hit = list.first(where: { $0.number == number }) else { return nil }
+      if !hit.windowServer && (0..<overlayLayer).contains(hit.layer) { return hit }
+      below = number
+    }
+    return nil
   }
 
-  static func leftToWindowManager(pointer: CGPoint?, own: Int32, windowManagers: Set<Int32>, frontToBack list: [Listed]) -> Bool {
-    guard let pointer, !list.isEmpty else { return true }
-    guard let hit = underPointer(pointer, frontToBack: list) else { return false }
+  static func leftToWindowManager(own: Int32, windowManagers: Set<Int32>, frontToBack list: [Listed], clickedBelow: (Int) -> Int) -> Bool {
+    guard !list.isEmpty else { return true }
+    guard let hit = underPointer(frontToBack: list, clickedBelow: clickedBelow) else { return false }
     if windowManagers.contains(hit.owner) { return true }
     return hit.owner == own && list.first { $0.layer == 0 } == hit
   }
